@@ -69,4 +69,8 @@ public class Vector {
     public double dot(Vector b) {
         return Vector.dot(this, b);
     }
+
+    public String toString() {
+        return "[x: " + this.x + ", y: " + this.y + ", z: " + this.z + "]";
+    }
 }

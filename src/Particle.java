@@ -32,10 +32,15 @@ public class Particle {
     }
 
     public void integrate(double timestep) {
-        position = position.add(velocity);
+        position = position.add(velocity.scale(timestep));
+    }
+
+    public static double distance(Particle p1, Particle p2) {
+        return p1.position.subtract(p2.position).magnitude();
     }
 
     public static boolean isColliding(Particle p1, Particle p2) {
-        return p1.position.subtract(p2.position).magnitude() <= (p1.radius + p2.radius);
+        double distance = Particle.distance(p1, p2);
+        return distance != 0 && distance < (p1.radius + p2.radius) ;
     }
 }
