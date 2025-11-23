@@ -73,4 +73,9 @@ public class Vector {
     public String toString() {
         return "[x: " + this.x + ", y: " + this.y + ", z: " + this.z + "]";
     }
+
+    public String toString(int rounding) {
+        double factor = Math.pow(10.0, rounding);
+        return "[x: " + Math.floor(this.x*factor)/factor + ", y: " + Math.floor(this.y*factor)/factor + ", z: " + Math.floor(this.z*factor)/factor + "]";
+    }
 }

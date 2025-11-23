@@ -2,23 +2,30 @@ import java.util.ArrayList;
 
 public class Container {
 
-    int particleCount = 1000;
+    int particleCount = 2000;
     ArrayList<Particle> particles = new ArrayList<Particle>(particleCount);
 
-    double width = 200;
-    double height = 200;
-    double depth = 200;
+    double width = 100;
+    double height = 100;
+    double depth = 100;
 
     double meanInitialSpeed = 100;
+    double particleMass = 1.0;
 
     int iterationsPerFrame = 3;
+
+    double netMomentumImpartedSoFar = 0.0;
+    long timeSinceLastPressureComputation = System.nanoTime();
+
+    private double pressure = 0.0;
+    private double volume = width * height * depth;
 
     public Container() {
         // spawn particles
         for(int i = 0; i < particleCount; i++) {
             Vector pPos = new Vector(Math.random() * width, Math.random() * height, Math.random() * depth);
             Vector pVel = new Vector(Math.random()*2.0*meanInitialSpeed, 0.0, 0.0);
-            Particle p = new Particle(pPos, pVel);
+            Particle p = new Particle(pPos, pVel, particleMass);
             particles.add(p);
         }
     }
@@ -36,10 +43,16 @@ public class Container {
 
             // detect collisions, calculate and apply impulses
             handleCollisions();
-
-            // log KE and check if its constant
-            // System.out.println(computeKineticEnergy());
         }
+
+        updatePressure();
+
+        // log KE and check if its constant
+        // System.out.println("KE: " + computeKineticEnergy());
+
+        // System.out.println("AvgVel: " + computeAverageVelocity().toString(2));
+        // System.out.println("RMS: " + computeRMSSpeed());
+        // System.out.println("Pressure: " + getPressure());
 
         // Code tracking a specific particle
         // Particle p1 = particles.get(0);
@@ -84,6 +97,8 @@ public class Container {
         }
 
         // elastic collisions with walls
+        
+
         for(int i = 0; i < particleCount; i++) {
             Particle p = particles.get(i);
             Vector pPos = p.getPosition();
@@ -94,6 +109,7 @@ public class Container {
                 pPos = p.getPosition();
                 if(pP.getX() > 0.0) {
                     p.applyImpulse(new Vector(-2.0 * pP.getX(), 0.0, 0.0));
+                    netMomentumImpartedSoFar += 2.0 * pP.getX();
                 }
             }
             if(pPos.getX() < 0.0) {
@@ -101,6 +117,7 @@ public class Container {
                 pPos = p.getPosition();
                 if(pP.getX() < 0.0) {
                     p.applyImpulse(new Vector(-2.0 * pP.getX(), 0.0, 0.0));
+                    netMomentumImpartedSoFar += 2.0 * pP.getX();
                 }
             }
 
@@ -109,6 +126,7 @@ public class Container {
                 pPos = p.getPosition();
                 if(pP.getY() > 0.0) {
                     p.applyImpulse(new Vector(0.0, -2.0 * pP.getY(), 0.0));
+                    netMomentumImpartedSoFar += 2.0 * pP.getY();
                 }
             }
             if(pPos.getY() < 0.0) {
@@ -116,6 +134,7 @@ public class Container {
                 pPos = p.getPosition();
                 if(pP.getY() < 0.0) {
                     p.applyImpulse(new Vector(0.0, -2.0 * pP.getY(), 0.0));
+                    netMomentumImpartedSoFar += 2.0 * pP.getY();
                 }
             }
 
@@ -124,6 +143,7 @@ public class Container {
                 pPos = p.getPosition();
                 if(pP.getZ() > 0.0) {
                     p.applyImpulse(new Vector(0.0, 0.0, -2.0 * pP.getZ()));
+                    netMomentumImpartedSoFar += 2.0 * pP.getZ();
                 }
             }
             if(pPos.getZ() < 0.0) {
@@ -131,13 +151,26 @@ public class Container {
                 pPos = p.getPosition();
                 if(pP.getZ() < 0.0) {
                     p.applyImpulse(new Vector(0.0, 0.0, -2.0 * pP.getZ()));
+                    netMomentumImpartedSoFar += 2.0 * pP.getZ();
                 }
             }
         }
     }
 
-    public double computeKineticEnergy() {
-        double KE = 0;
+    public void updatePressure() {
+        double area = 2.0*(width*height + height*depth + depth*width);
+        long now = System.nanoTime();
+        double dt = ((double) (now - timeSinceLastPressureComputation)) * 1e-9;
+        timeSinceLastPressureComputation = now;
+        pressure = netMomentumImpartedSoFar / (dt * area);
+    }
+
+    public double getVolume() { return volume; }
+    
+    public double getPressure() { return pressure; }
+
+    public double computeTotalSquaredVelocity() {
+        double v2sum = 0.0;
         for(int i = 0; i < particleCount; i++) {
             Particle p = particles.get(i);
             Vector vel = p.getVelocity();
@@ -145,8 +178,27 @@ public class Container {
             // magnitude of velocity squared
             double v2 = vel.getX()*vel.getX() + vel.getY()*vel.getY() + vel.getZ()*vel.getZ();
 
-            KE += 0.5 * p.mass * v2;
+            v2sum += v2;
         }
-        return KE;
+        return v2sum;
+    }
+
+    public double computeKineticEnergy() {
+        return computeTotalSquaredVelocity() * particleMass * 0.5;
+    }
+
+    public double computeRMSSpeed() {
+        return Math.sqrt(computeTotalSquaredVelocity() / ((double) particleCount));
+    }
+
+    public Vector computeAverageVelocity() {
+        Vector sum = new Vector(0.0, 0.0, 0.0);
+        for(int i = 0; i < particleCount; i++) {
+            Particle p = particles.get(i);
+            Vector v = p.getVelocity();
+            sum = sum.add(v);
+        }
+        sum = sum.scale(1.0/((double) particleCount));
+        return sum;
     }
 }

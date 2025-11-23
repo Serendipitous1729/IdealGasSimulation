@@ -1,13 +1,15 @@
 public class Particle {
     private Vector position;
     private Vector velocity;
-    final double mass = 1.0;
-    final double reciprocalMass = 1.0/mass;
+    final double mass;
+    final double reciprocalMass;
     final double radius = 1.0;
 
-    public Particle(Vector initialPosition, Vector initialVelocity) {
+    public Particle(Vector initialPosition, Vector initialVelocity, double mass) {
         this.position = initialPosition;
         this.velocity = initialVelocity;
+        this.mass = mass;
+        this.reciprocalMass = 1/this.mass;
     }
 
     public Vector getPosition() {
