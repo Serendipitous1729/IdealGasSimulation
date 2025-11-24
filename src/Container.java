@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Container {
 
-    int particleCount = 2000;
+    int particleCount = 1000;
     ArrayList<Particle> particles = new ArrayList<Particle>(particleCount);
 
     double width = 100;
@@ -200,5 +200,23 @@ public class Container {
         }
         sum = sum.scale(1.0/((double) particleCount));
         return sum;
+    }
+
+    public int[] computeSpeedHistogram(double bucketWidth) {
+        double maxSpeed = 0.0;
+        for(int i = 0; i < particleCount; i++) {
+            double speed = particles.get(i).getVelocity().magnitude();
+            if(speed > maxSpeed) { maxSpeed = speed; } 
+        }
+
+        int numBuckets = (int) (maxSpeed / bucketWidth) + 1;
+        int[] histogram = new int[numBuckets];
+        for(int i = 0; i < particleCount; i++) {
+            double speed = particles.get(i).getVelocity().magnitude();
+            int bucketIndex = (int) (speed / bucketWidth);
+            histogram[bucketIndex]++;
+        }
+
+        return histogram;
     }
 }

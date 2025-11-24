@@ -6,7 +6,7 @@ public class Simulation {
 
     Container container = new Container();
 
-    final int EXPERIMENT_NUMBER = 2; // update this every time
+    final int EXPERIMENT_NUMBER = 0; // update this every time
  
     PrintWriter observations;
 
@@ -67,6 +67,14 @@ public class Simulation {
             // try { Thread.sleep(1); } catch (Exception ignored) {}
         }
 
+        double histogramWidth = 10.0;
+        int[] histogram = container.computeSpeedHistogram(histogramWidth);
+        observations.printf("\nhistogramWidth,%f\nhistogram,", histogramWidth);
+        // System.out.println(Simulation.join(histogram, ","));
+        observations.printf(Simulation.join(histogram, ",") + "\n");
+
+        observations.flush();
+        observations.close();
         System.out.println("praise Boltzmann! the experiment is a success!");
         System.exit(0);
     }
@@ -76,4 +84,15 @@ public class Simulation {
 
         new Simulation();
     }
+
+    public static String join(int[] arr, String sep) {
+    if (arr.length == 0) return "";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(arr[0]);
+    for (int i = 1; i < arr.length; i++) {
+        sb.append(sep).append(arr[i]);
+    }
+    return sb.toString();
+}
 }

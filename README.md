@@ -1,18 +1,12 @@
-## Getting Started
+A simulation of an ideal gas in Java.
+Every time an experiment is conducted (the simulation is run), data is logged to a CSV file.
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Experiments 1: 2000 atoms, ~same energy, 100x100x100
+Experiment 2: same as 1
+Experiment 3-5: same as 2, with varied volume
+Experiments 6-9: same as 2-5, with 1000 atoms only
 
-## Folder Structure
+These observations match with what is predicted by theory.
+They have been summarized in observations.xlsx
 
-The workspace contains two folders by default, where:
-
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+NOTE: Remember to update EXPERIMENT_NUMBER every time you conduct a different experiment
